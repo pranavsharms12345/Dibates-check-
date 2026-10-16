@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#f5f8fc">
+  <title>GlucoCheck | Diabetes Risk Estimator</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+<header class="topbar">
+  <a class="brand" href="/"><span class="brand-mark">✚</span><span>Gluco<span class="brand-accent">Check</span><small>HEALTH ESTIMATOR</small></span></a>
+  <span class="privacy"><span class="privacy-dot"></span> Educational estimate</span>
+</header>
+
+<main class="page">
+  <section class="intro">
+    <div class="eyebrow"><span class="eyebrow-line"></span> KNOW YOUR INDICATORS</div>
+    <h1>A clearer picture of<br><span>your health.</span></h1>
+    <p class="intro-copy">Enter the six values used by the machine-learning model. Your result will indicate whether the model predicts a lower or higher likelihood of diabetes. This is an awareness tool, not a medical diagnosis.</p>
+  </section>
+
+  <section class="workspace">
+    <form id="prediction-form" class="form-card">
+      <div class="card-heading">
+        <div><div class="section-kicker">YOUR INFORMATION</div><h2>Health indicators</h2><p>Enter your latest measurements where available.</p></div>
+        <span class="step-pill">01 <span>/ 02</span></span>
+      </div>
+      <div class="fields-grid">
+        <label class="field">
+          <span class="field-title">Pregnancies</span>
+          <span class="input-wrap"><input name="Pregnancies" type="number" min="0" max="20" step="1" placeholder="e.g. 2" required><span class="unit">count</span></span>
+          <span class="hint">No single pregnancy count diagnoses diabetes.</span>
+        </label>
+        <label class="field">
+          <span class="field-title">Glucose (fasting)</span>
+          <span class="input-wrap"><input name="Glucose" type="number" min="0" max="400" step="any" placeholder="e.g. 95" required><span class="unit">mg/dL</span></span>
+          <span class="hint">Typical fasting range: 70–99 mg/dL.</span>
+        </label>
+        <label class="field">
+          <span class="field-title">Blood pressure</span>
+          <span class="input-wrap"><input name="BloodPressure" type="number" min="0" max="250" step="any" placeholder="e.g. 78" required><span class="unit">mmHg</span></span>
+          <span class="hint">Generally below 120/80; not a diabetes test.</span>
+        </label>
+        <label class="field">
+          <span class="field-title">BMI</span>
+          <span class="input-wrap"><input name="BMI" type="number" min="0" max="100" step="any" placeholder="e.g. 23.5" required><span class="unit">kg/m²</span></span>
+          <span class="hint">18.5–24.9 is the usual adult healthy range.</span>
+        </label>
+        <label class="field">
+          <span class="field-title">Diabetes pedigree function <span class="info" title="A dataset-specific feature related to family history">i</span></span>
+          <span class="input-wrap"><input name="DiabetesPedigreeFunction" type="number" min="0" max="5" step="any" placeholder="e.g. 0.35" required><span class="unit">score</span></span>
+          <span class="hint">No standard clinical cutoff; model feature.</span>
+        </label>
+        <label class="field">
+          <span class="field-title">Age</span>
+          <span class="input-wrap"><input name="Age" type="number" min="1" max="120" step="1" placeholder="e.g. 35" required><span class="unit">years</span></span>
+          <span class="hint">Risk tends to rise with age; no fixed cutoff.</span>
+        </label>
+      </div>
+      <div class="form-note"><span class="note-symbol">ⓘ</span><span>Glucose cutoffs shown are for fasting lab tests. Use the same feature definitions and units as your training dataset. A high value in one field alone does not determine the model result.</span></div>
+      <div id="error-message" class="error-message" role="alert" hidden></div>
+      <button id="submit-button" class="submit-button" type="submit"><span>Estimate likelihood</span><span class="button-arrow">→</span></button>
+      <p class="form-footnote"><span class="lock-icon">▣</span> This app does not save submitted values.</p>
+    </form>
+
+    <aside class="result-card" id="result-card">
+      <div class="result-topline"><span class="result-icon">✦</span><span>YOUR MODEL RESULT</span></div>
+      <div id="empty-state" class="empty-state">
+        <div class="illustration"><div class="orbit orbit-one"></div><div class="orbit orbit-two"></div><div class="heart">♡</div><span class="spark spark-one">✦</span><span class="spark spark-two">+</span></div>
+        <h3>Your result<br>will appear here.</h3>
+        <p>Complete all six fields and select <strong>Estimate likelihood</strong>.</p>
+        <div class="result-mini"><span class="mini-check">✓</span><span>Lower or higher likelihood</span></div>
+        <div class="result-mini"><span class="mini-check">✓</span><span>Probability, if supported by model</span></div>
+      </div>
+      <div id="result-content" class="result-content" hidden aria-live="polite">
+        <div id="result-badge" class="result-badge">MODEL RESULT</div>
+        <h3 id="result-title">Prediction complete</h3>
+        <p id="result-description" class="result-description"></p>
+        <div class="probability-panel">
+          <div class="probability-heading"><span>Model-estimated probability for outcome 1</span><strong id="probability-value">—</strong></div>
+          <div class="progress-track"><div id="probability-bar" class="progress-bar"></div></div>
+          <p>This percentage is the model's estimate, not a confirmed medical probability.</p>
+        </div>
+        <div class="result-advice"><span class="advice-icon">♡</span><div><strong>Important</strong><p id="disclaimer-text">Consult a healthcare professional for appropriate testing and advice.</p></div></div>
+        <button id="reset-button" class="reset-button" type="button">Start a new estimate <span>↻</span></button>
+      </div>
+      <div class="medical-disclaimer"><strong>Medical guidance</strong><p>Fasting glucose 100–125 mg/dL is in the prediabetes range and ≥126 mg/dL is in the diabetes range when confirmed using appropriate testing. Blood pressure, BMI, age, pregnancies, and pedigree score do not diagnose diabetes on their own.</p></div>
+    </aside>
+  </section>
+
+  <section class="reference-section">
+    <div class="reference-heading"><div class="section-kicker">QUICK REFERENCE</div><h2>Understand the indicators</h2><p>These are general adult references, not a replacement for individual medical advice.</p></div>
+    <div class="reference-table-wrap">
+      <table class="reference-table">
+        <thead><tr><th>Feature</th><th>Typical range / level</th><th>High-risk indication or context</th></tr></thead>
+        <tbody>
+          <tr><td><strong>Glucose (fasting)</strong></td><td>70–99 mg/dL</td><td><span class="table-tag warning">100–125</span> Prediabetes range; <strong>≥126 mg/dL</strong> diabetes range if confirmed by appropriate testing.</td></tr>
+          <tr><td><strong>Blood pressure</strong></td><td>Generally below 120/80 mmHg</td><td>High blood pressure is a risk factor, but it is not a diabetes diagnostic test.</td></tr>
+          <tr><td><strong>BMI</strong></td><td>18.5–24.9 for adults</td><td>BMI ≥25 is overweight by common adult categories; risk may increase. BMI alone does not diagnose diabetes.</td></tr>
+          <tr><td><strong>Age</strong></td><td>No single normal/abnormal cutoff</td><td>Risk generally increases with age; screening recommendations often change around age 35.</td></tr>
+          <tr><td><strong>Pregnancies</strong></td><td>No diabetes-specific normal limit</td><td>Pregnancy count alone does not confirm diabetes. History of gestational diabetes is a separate risk factor.</td></tr>
+          <tr><td><strong>Diabetes pedigree function</strong></td><td>No standard clinical cutoff</td><td>A dataset-specific model feature related to family history; not a standalone clinical measurement.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+  <footer>GLUCOCHECK <span>•</span> EDUCATIONAL PROJECT <span class="footer-right">HTML · CSS · JavaScript · Flask</span></footer>
+</main>
+<script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>
